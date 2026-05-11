@@ -1100,6 +1100,7 @@
   </div>
 </div>
 
+<script src="https://player.vimeo.com/api/player.js"></script>
 <script>
   function switchTab(index) {
     document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === index));
@@ -1113,9 +1114,10 @@
     if (isOpen) {
       if (!iframe.src || iframe.src === window.location.href) {
         iframe.src = iframe.dataset.src;
-        iframe.addEventListener('load', function() {
-          iframe.contentWindow.postMessage(JSON.stringify({ method: 'setVolume', value: 0 }), 'https://player.vimeo.com');
-        }, { once: true });
+        const player = new Vimeo.Player(iframe);
+        player.ready().then(function() {
+          player.setVolume(0);
+        });
       }
     } else {
       iframe.src = '';
