@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Treinos Weliton</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #e8e8e8;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 20px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+
+    header p {
+      font-size: 12px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .tabs {
+      display: flex;
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 0 24px;
+      gap: 4px;
+      position: sticky;
+      top: 69px;
+      z-index: 99;
+    }
+
+    .tab {
+      padding: 14px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab:hover { color: #ccc; }
+
+    .tab.active {
+      color: #fff;
+      border-bottom-color: #e07b39;
+    }
+
+    .day-panel {
+      display: none;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+    }
+
+    .day-panel.active { display: block; }
+
+    .day-header {
+      margin-bottom: 24px;
+    }
+
+    .day-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .day-header .grupo {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #e07b39;
+      background: rgba(224,123,57,0.12);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    .day-header .dicas {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #888;
+      line-height: 1.6;
+      padding: 12px 14px;
+      background: #1a1a1a;
+      border-left: 3px solid #333;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #555;
+      margin: 28px 0 12px;
+    }
+
+    .exercise {
+      background: #1a1a1a;
+      border: 1px solid #242424;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .exercise:hover { border-color: #333; }
+
+    .exercise-main {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      cursor: pointer;
+    }
+
+    .exercise-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: #555;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .exercise-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #2a2a2a;
+      flex-shrink: 0;
+    }
+
+    .exercise-thumb-placeholder {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      background: #2a2a2a;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .exercise-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .exercise-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e8e8e8;
+      text-transform: capitalize;
+      line-height: 1.3;
+    }
+
+    .exercise-meta {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #242424;
+      color: #aaa;
+    }
+
+    .badge.series { color: #e07b39; background: rgba(224,123,57,0.1); }
+    .badge.reps   { color: #5ca8f0; background: rgba(92,168,240,0.1); }
+    .badge.tempo  { color: #63c77a; background: rgba(99,199,122,0.1); }
+
+    .expand-icon {
+      font-size: 16px;
+      color: #444;
+      flex-shrink: 0;
+      transition: transform 0.25s;
+    }
+
+    .exercise.open .expand-icon { transform: rotate(180deg); }
+
+    .exercise-detail {
+      display: none;
+      padding: 0 16px 16px 16px;
+      border-top: 1px solid #222;
+    }
+
+    .exercise.open .exercise-detail { display: block; }
+
+    .exercise-detail-inner {
+      display: flex;
+      gap: 16px;
+      padding-top: 14px;
+    }
+
+    .video-thumb-wrap {
+      flex-shrink: 0;
+    }
+
+    .video-thumb-wrap a {
+      display: block;
+      position: relative;
+      width: 120px;
+      height: 76px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+
+    .video-thumb-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.45);
+      transition: background 0.2s;
+    }
+
+    .video-thumb-wrap a:hover .play-overlay { background: rgba(0,0,0,0.3); }
+
+    .play-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .play-icon svg { margin-left: 3px; }
+
+    .notes-wrap { flex: 1; min-width: 0; }
+
+    .note {
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: #999;
+      margin-bottom: 8px;
+    }
+
+    .note:last-child { margin-bottom: 0; }
+
+    .note strong {
+      color: #ccc;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .biset-group {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .biset-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 4px 10px;
+      border-radius: 4px 4px 0 0;
+      margin-bottom: 0;
+    }
+
+    .biset-label::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .biset-group .exercise {
+      margin-bottom: 0;
+      border-radius: 0;
+      border-bottom-width: 0;
+    }
+
+    .biset-group .exercise:first-of-type {
+      border-radius: 0 12px 0 0;
+    }
+
+    .biset-group .exercise:last-of-type {
+      border-radius: 0 0 12px 12px;
+      border-bottom-width: 1px;
+      margin-bottom: 0;
+    }
+
+
+    .biset-connector {
+      width: 2px;
+      position: absolute;
+      left: 28px;
+      background: currentColor;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    @media (max-width: 480px) {
+      .tabs { padding: 0 12px; overflow-x: auto; }
+      .tab { padding: 12px 14px; font-size: 12px; }
+      .day-panel { padding: 20px 14px 40px; }
+      .exercise-detail-inner { flex-direction: column; }
+      .video-thumb-wrap a { width: 100%; height: 140px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Treinos Weliton</h1>
+  <p>Cristian Goettmes — Treinamento Personalizado</p>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)">Segunda</div>
+  <div class="tab" onclick="switchTab(1)">Terça</div>
+  <div class="tab" onclick="switchTab(2)">Quarta</div>
+</div>
+
+<!-- =========================================================
+     SEGUNDA-FEIRA — Treino 1: Costas e Bíceps
+     ========================================================= -->
+<div class="day-panel active" id="panel-0">
+  <div class="day-header">
+    <h2>Treino 1 · Weliton</h2>
+    <span class="grupo">Costas e Bíceps</span>
+    <p class="dicas">Manter-se na zona de repetições. Quando conseguir passar da zona, aumenta a carga. Intervalos entre 45 e 90 segundos, a depender da intensidade.</p>
+  </div>
+
+  <div class="section-label">Aquecimento</div>
+
+  <!-- 1 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">1</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/2062990927-45984590d7824bfa930621618681a19d38e1359fe04167380d015a5881543cda-d_375?q=50" alt="Alongamento pendurado">
+      <div class="exercise-info">
+        <div class="exercise-name">Alongamento pendurado</div>
+        <div class="exercise-meta">
+          <span class="badge series">1 série</span>
+          <span class="badge tempo">45 seg</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/1121825991" target="_blank">
+            <img src="https://i.vimeocdn.com/video/2062990927-45984590d7824bfa930621618681a19d38e1359fe04167380d015a5881543cda-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"><p class="note">Tempo de 45 segundos por série.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">2</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/2062994352-e458f93813de80275ee141528b4198895ce71edba664c880b29f232029e429f8-d_375?q=50" alt="Alongamento peitoral">
+      <div class="exercise-info">
+        <div class="exercise-name">Alongamento peitoral</div>
+        <div class="exercise-meta">
+          <span class="badge series">1 série</span>
+          <span class="badge tempo">45 seg</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/1121828729" target="_blank">
+            <img src="https://i.vimeocdn.com/video/2062994352-e458f93813de80275ee141528b4198895ce71edba664c880b29f232029e429f8-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"><p class="note">Tempo de 45 segundos por série.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">3</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/904433561-7c703d058d286e2810c58f7d2e5d1c4bec669aee3c03b98bcc64d7d6fdf4fe6e-d_375?q=50" alt="Mobilidade torácica">
+      <div class="exercise-info">
+        <div class="exercise-name">Mobilidade torácica 3 apoios</div>
+        <div class="exercise-meta">
+          <span class="badge series">1 série</span>
+          <span class="badge reps">12 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/425506203" target="_blank">
+            <img src="https://i.vimeocdn.com/video/904433561-7c703d058d286e2810c58f7d2e5d1c4bec669aee3c03b98bcc64d7d6fdf4fe6e-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Principal</div>
+
+  <!-- 4 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">4</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854616600-9616ff9f71258c1ad617eb4ce09834eaed37df5c92b649e60b9a92b4502ce842-d_375?q=50" alt="Remada baixa aberta">
+      <div class="exercise-info">
+        <div class="exercise-name">Remada baixa aberta com pegada pronada</div>
+        <div class="exercise-meta">
+          <span class="badge series">4 séries</span>
+          <span class="badge reps">15 / 12 / 8 / 4–8</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390480004" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854616600-9616ff9f71258c1ad617eb4ce09834eaed37df5c92b649e60b9a92b4502ce842-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note"><strong>Dica</strong>Remar com os cotovelos mais abertos em relação ao tronco, puxando a barra um pouco acima da linha do umbigo.</p>
+          <p class="note"><strong>Progressão</strong>1ª série: 15 reps · 2ª série: 12 reps · 3ª série: 8 reps · 4ª série: 4 a 8 reps.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">5</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854612541-cf144758ce8fb39df7fe107679d1c4c79fe830c6e69d03b6c87c43bdf0164558-d_375?q=50" alt="Pulldown">
+      <div class="exercise-info">
+        <div class="exercise-name">Pulldown na polia alta com barra</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">10 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390476878" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854612541-cf144758ce8fb39df7fe107679d1c4c79fe830c6e69d03b6c87c43bdf0164558-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Parar 2 segundos embaixo em todas as repetições, mantendo ombros baixos e para trás.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">6</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854614333-5bcdf046828cfe07fa0cdd3479f3e0c278bdc149c210f1f0961d8499a3a25f7b-d_375?q=50" alt="Puxada frente triângulo">
+      <div class="exercise-info">
+        <div class="exercise-name">Puxada frente triângulo</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">10 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390478201" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854614333-5bcdf046828cfe07fa0cdd3479f3e0c278bdc149c210f1f0961d8499a3a25f7b-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Segurar 15 segundos de isometria embaixo na primeira repetição. Após os 15 seg, fazer 6 a 10 repetições normais.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">7</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854618985-9cfb3f820cb3cd284c16730fc1218a06bf81c6561bb7b05a9ba289fccdb4ca5c-d_375?q=50" alt="Rosca bíceps polia alta">
+      <div class="exercise-info">
+        <div class="exercise-name">Rosca bíceps unilateral na polia alta</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">12 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390481707" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854618985-9cfb3f820cb3cd284c16730fc1218a06bf81c6561bb7b05a9ba289fccdb4ca5c-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Manter o cotovelo sempre na altura do ombro e bem lateral ao tronco.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">8</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854624517-7f365d373604b4f14212cfe6ec74b3f1eb7df39e9de515c2967da91f21a7eaa9-d_375?q=50" alt="Costas polia alta">
+      <div class="exercise-info">
+        <div class="exercise-name">Costas na polia alta</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">15 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390485632" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854624517-7f365d373604b4f14212cfe6ec74b3f1eb7df39e9de515c2967da91f21a7eaa9-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Manter os cotovelos levemente flexionados o tempo todo. Terminar o movimento com as mãos um pouco abaixo da linha do ombro.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">9</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854613556-a8e39a481f7aaaab1a5f8eb543cac04a54d3d1fc1f25ea678068b91de2da05f2-d_375?q=50" alt="Serrote">
+      <div class="exercise-info">
+        <div class="exercise-name">Serrote no banco unilateral com halter</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">10 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390477650" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854613556-a8e39a481f7aaaab1a5f8eb543cac04a54d3d1fc1f25ea678068b91de2da05f2-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Mão e joelho do mesmo lado apoiados no banco. Levar o peso sempre para trás na hora de puxar, em direção ao quadril.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">10</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854618850-20c09a0f273e8ec70bceb45e5b830463749cb701919e1a90a9f9d5e0a199dfc9-d_375?q=50" alt="Bíceps martelo">
+      <div class="exercise-info">
+        <div class="exercise-name">Bíceps martelo unilateral com halter</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">8 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390481618" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854618850-20c09a0f273e8ec70bceb45e5b830463749cb701919e1a90a9f9d5e0a199dfc9-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- =========================================================
+     TERÇA-FEIRA — Treino 2: Peito e Tríceps
+     ========================================================= -->
+<div class="day-panel" id="panel-1">
+  <div class="day-header">
+    <h2>Treino 2 · Weliton</h2>
+    <span class="grupo">Peito e Tríceps</span>
+    <p class="dicas">Manter-se na zona de repetições. Quando conseguir passar da zona, aumenta a carga. Intervalos entre 45 e 90 segundos.</p>
+  </div>
+
+  <div class="section-label">Aquecimento</div>
+
+  <!-- 1 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">1</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/2062994531-28118695695e30e40e5ae34f049733cefaf801160c78347021f2690bdd30910d-d_375?q=50" alt="Alongamento lateral">
+      <div class="exercise-info">
+        <div class="exercise-name">Alongamento lateral</div>
+        <div class="exercise-meta">
+          <span class="badge series">1 série</span>
+          <span class="badge reps">45 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/1121828880" target="_blank">
+            <img src="https://i.vimeocdn.com/video/2062994531-28118695695e30e40e5ae34f049733cefaf801160c78347021f2690bdd30910d-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">2</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/903094007-5bf148ea33ae1b029e55d05cfc32e4463dd53e5f3a24bc88abbc24053aeaccb8-d_375?q=50" alt="Relógio">
+      <div class="exercise-info">
+        <div class="exercise-name">Relógio</div>
+        <div class="exercise-meta">
+          <span class="badge series">1 série</span>
+          <span class="badge reps">12 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/425505311" target="_blank">
+            <img src="https://i.vimeocdn.com/video/903094007-5bf148ea33ae1b029e55d05cfc32e4463dd53e5f3a24bc88abbc24053aeaccb8-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">3</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/1368246037-4d464b5dcc9f1c2ad36c6bbf1d79bc88d8357cdbe76676b0a5141a9e36d6bad9-d_375?q=50" alt="Flexão pliometria">
+      <div class="exercise-info">
+        <div class="exercise-name">Flexão de cotovelo com pliometria</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">100 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/675019127" target="_blank">
+            <img src="https://i.vimeocdn.com/video/1368246037-4d464b5dcc9f1c2ad36c6bbf1d79bc88d8357cdbe76676b0a5141a9e36d6bad9-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Fazer saltando. Se não conseguir saltar, desce lento e acelera a subida o máximo que conseguir.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Principal</div>
+
+  <!-- 4 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">4</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854612883-fb692a4529aadab492cdba2e748738de1bd7e53f5248bc787939457785e30994-d_375?q=50" alt="Supino inclinado">
+      <div class="exercise-info">
+        <div class="exercise-name">Supino inclinado com barra</div>
+        <div class="exercise-meta">
+          <span class="badge series">4 séries</span>
+          <span class="badge reps">10 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390477120" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854612883-fb692a4529aadab492cdba2e748738de1bd7e53f5248bc787939457785e30994-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Escápulas fechadas em todo o movimento.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">5</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854624113-bb15e2d3ba9d67225a950c5e3d933097c2150ff270a725ad64bc1b3248784542-d_375?q=50" alt="Elevação frontal polia">
+      <div class="exercise-info">
+        <div class="exercise-name">Elevação frontal na polia baixa pegada supinada</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">10 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390485356" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854624113-bb15e2d3ba9d67225a950c5e3d933097c2150ff270a725ad64bc1b3248784542-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Parar 2 segundos em cima em todas as 10 repetições, pensando sempre em aproximar o cotovelo um do outro — não pensar na mão.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">6</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854620505-86a286d7414b822c18af840dd948e03464912232ab4df9b43c240b2a90ea5b8d-d_375?q=50" alt="Tríceps coice">
+      <div class="exercise-info">
+        <div class="exercise-name">Tríceps coice curvado unilateral na polia baixa</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">15 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390482709" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854620505-86a286d7414b822c18af840dd948e03464912232ab4df9b43c240b2a90ea5b8d-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Manter cotovelo alto o tempo todo.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="biset-group">
+    <div class="biset-label" style="color:#A0F038; background:rgba(160,240,56,0.1);">Bi-set</div>
+    <!-- 7 -->
+    <div class="exercise" onclick="toggle(this)" style="border-left: 3px solid #A0F038;">
+      <div class="exercise-main">
+        <span class="exercise-num">7</span>
+        <img class="exercise-thumb" src="https://i.vimeocdn.com/video/2128801072-e8320941578542df8b885bf15acc567858680d41f75b2b74a5b78c7e5ac2cd89-d_375?q=50" alt="Elevação frontal band">
+        <div class="exercise-info">
+          <div class="exercise-name">Elevação frontal com band</div>
+          <div class="exercise-meta">
+            <span class="badge series">3 séries</span>
+            <span class="badge reps">15 reps</span>
+          </div>
+        </div>
+        <span class="expand-icon">▾</span>
+      </div>
+      <div class="exercise-detail">
+        <div class="exercise-detail-inner">
+          <div class="video-thumb-wrap">
+            <a href="https://player.vimeo.com/video/1169882541" target="_blank">
+              <img src="https://i.vimeocdn.com/video/2128801072-e8320941578542df8b885bf15acc567858680d41f75b2b74a5b78c7e5ac2cd89-d_375?q=50" alt="">
+              <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+            </a>
+          </div>
+          <div class="notes-wrap">
+            <p class="note">Tensionar a mini band para fora durante todo o movimento.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 8 -->
+    <div class="exercise" onclick="toggle(this)" style="border-left: 3px solid #A0F038;">
+      <div class="exercise-main">
+        <span class="exercise-num">8</span>
+        <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854621114-e0a4fd29994622a09b82cba609e1ccc4addfc6069d34e66e14e88380ef2cdbbe-d_375?q=50" alt="Elevação lateral">
+        <div class="exercise-info">
+          <div class="exercise-name">Elevação lateral de ombros sentado com halter</div>
+          <div class="exercise-meta">
+            <span class="badge series">3 séries</span>
+            <span class="badge reps">12 reps</span>
+          </div>
+        </div>
+        <span class="expand-icon">▾</span>
+      </div>
+      <div class="exercise-detail">
+        <div class="exercise-detail-inner">
+          <div class="video-thumb-wrap">
+            <a href="https://player.vimeo.com/video/390483170" target="_blank">
+              <img src="https://i.vimeocdn.com/video/854621114-e0a4fd29994622a09b82cba609e1ccc4addfc6069d34e66e14e88380ef2cdbbe-d_375?q=50" alt="">
+              <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+            </a>
+          </div>
+          <div class="notes-wrap">
+            <p class="note">Erguer o banco para ficar com as costas apoiadas durante todo o movimento.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">9</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854623339-dabce42b36f5556fa09491f027498ad6d278cdb54b30d5e968dc7fac9e1f2b85-d_375?q=50" alt="Tríceps polia alta">
+      <div class="exercise-info">
+        <div class="exercise-name">Tríceps na polia alta</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">10 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390484775" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854623339-dabce42b36f5556fa09491f027498ad6d278cdb54b30d5e968dc7fac9e1f2b85-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">10</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854621883-ce9fbb7146b35cdee2fe7d171094c6bb5155c1c17aa839ba808ba181fe5b73fb-d_375?q=50" alt="Supino halter">
+      <div class="exercise-info">
+        <div class="exercise-name">Supino com halter</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">10 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390483673" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854621883-ce9fbb7146b35cdee2fe7d171094c6bb5155c1c17aa839ba808ba181fe5b73fb-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Parar 2 segundos embaixo em todas as repetições.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- =========================================================
+     QUARTA-FEIRA — Treino 3: Inferiores e Abdômen
+     ========================================================= -->
+<div class="day-panel" id="panel-2">
+  <div class="day-header">
+    <h2>Treino 3 · Weliton</h2>
+    <span class="grupo">Inferiores e Abdômen</span>
+    <p class="dicas">Manter-se na zona de repetições. Quando conseguir passar da zona, aumenta a carga. Intervalos entre 45 e 90 segundos.</p>
+  </div>
+
+  <div class="section-label">Mobilidade</div>
+
+  <!-- 1 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">1</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/903072900-415e1bcaba136aba09b903436e2eb1dc25e5d21c8defd1aee113dbc50e40d420-d_375?q=50" alt="Mobilidade quadril 7">
+      <div class="exercise-info">
+        <div class="exercise-name">Mobilidade de quadril 7</div>
+        <div class="exercise-meta">
+          <span class="badge series">1 série</span>
+          <span class="badge reps">12 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/425495166" target="_blank">
+            <img src="https://i.vimeocdn.com/video/903072900-415e1bcaba136aba09b903436e2eb1dc25e5d21c8defd1aee113dbc50e40d420-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">2</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/903082523-efec7db652d391dc10ba970561546c87f3ffd91636cbf31e9a30cf4baf1dabeb-d_375?q=50" alt="Mobilidade quadril 6">
+      <div class="exercise-info">
+        <div class="exercise-name">Mobilidade de quadril 6</div>
+        <div class="exercise-meta">
+          <span class="badge series">1 série</span>
+          <span class="badge reps">12 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/425498226" target="_blank">
+            <img src="https://i.vimeocdn.com/video/903082523-efec7db652d391dc10ba970561546c87f3ffd91636cbf31e9a30cf4baf1dabeb-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">3</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/903068029-db12bacd3d16ac06c1543bd0f0f5d751249dddde15a9ae2d0be1b48fb33bfd42-d_375?q=50" alt="Mobilidade quadril 8">
+      <div class="exercise-info">
+        <div class="exercise-name">Mobilidade de quadril 8</div>
+        <div class="exercise-meta">
+          <span class="badge series">1 série</span>
+          <span class="badge reps">12 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/425492367" target="_blank">
+            <img src="https://i.vimeocdn.com/video/903068029-db12bacd3d16ac06c1543bd0f0f5d751249dddde15a9ae2d0be1b48fb33bfd42-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">4</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/903080587-debc79c783acc402a71726ccc4c706bef59bbf95736d8c309d7361a1ad1183c5-d_375?q=50" alt="Alongamento dinâmico">
+      <div class="exercise-info">
+        <div class="exercise-name">Alongamento dinâmico posterior e quadril</div>
+        <div class="exercise-meta">
+          <span class="badge series">1 série</span>
+          <span class="badge tempo">60 seg</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/425499880" target="_blank">
+            <img src="https://i.vimeocdn.com/video/903080587-debc79c783acc402a71726ccc4c706bef59bbf95736d8c309d7361a1ad1183c5-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Fazer isométrico — perna do chão fica esticada no chão.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Principal</div>
+
+  <!-- 5 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">5</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854626333-1e26240905adbf95052cfedce2bfee511c33610d83e6184495904348c05e7609-d_375?q=50" alt="Prancha">
+      <div class="exercise-info">
+        <div class="exercise-name">Prancha</div>
+        <div class="exercise-meta">
+          <span class="badge series">4 séries</span>
+          <span class="badge tempo">45 seg</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/390486816" target="_blank">
+            <img src="https://i.vimeocdn.com/video/854626333-1e26240905adbf95052cfedce2bfee511c33610d83e6184495904348c05e7609-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">6</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/1353989780-f7b22edd7896f95e70640e240d609c5c26f3c480150692f1f75a90e3d03dfa29-d_375?q=50" alt="Afundo Búlgaro">
+      <div class="exercise-info">
+        <div class="exercise-name">Agachamento / Afundo Búlgaro</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">10 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/668655266" target="_blank">
+            <img src="https://i.vimeocdn.com/video/1353989780-f7b22edd7896f95e70640e240d609c5c26f3c480150692f1f75a90e3d03dfa29-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Na 3ª série: finaliza as 10 repetições, solta os pesos, e segura embaixo em isometria pelo tempo que conseguir.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="biset-group">
+    <div class="biset-label" style="color:#28AFEA; background:rgba(40,175,234,0.1);">Bi-set</div>
+    <!-- 7 -->
+    <div class="exercise" onclick="toggle(this)" style="border-left: 3px solid #28AFEA;">
+      <div class="exercise-main">
+        <span class="exercise-num">7</span>
+        <img class="exercise-thumb" src="https://i.vimeocdn.com/video/1368239771-54fe279923f2963f2338cb4e517165407f92736a55090a36150bc6842ef7f247-d_375?q=50" alt="Extensão quadril joelhos">
+        <div class="exercise-info">
+          <div class="exercise-name">Extensão de quadril de joelhos</div>
+          <div class="exercise-meta">
+            <span class="badge series">3 séries</span>
+            <span class="badge reps">15 reps</span>
+          </div>
+        </div>
+        <span class="expand-icon">▾</span>
+      </div>
+      <div class="exercise-detail">
+        <div class="exercise-detail-inner">
+          <div class="video-thumb-wrap">
+            <a href="https://player.vimeo.com/video/675015648" target="_blank">
+              <img src="https://i.vimeocdn.com/video/1368239771-54fe279923f2963f2338cb4e517165407f92736a55090a36150bc6842ef7f247-d_375?q=50" alt="">
+              <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+            </a>
+          </div>
+          <div class="notes-wrap">
+            <p class="note">Manter o quadril estendido — não "sentar" no calcanhar.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 8 -->
+    <div class="exercise" onclick="toggle(this)" style="border-left: 3px solid #28AFEA;">
+      <div class="exercise-main">
+        <span class="exercise-num">8</span>
+        <img class="exercise-thumb" src="https://i.vimeocdn.com/video/854611067-9264d03d079d08fa2bd91f720d95de9e0b585cbbf5d7045355ecc70384e7e32d-d_375?q=50" alt="Cadeira extensora">
+        <div class="exercise-info">
+          <div class="exercise-name">Cadeira extensora</div>
+          <div class="exercise-meta">
+            <span class="badge series">3 séries</span>
+            <span class="badge reps">12 reps</span>
+          </div>
+        </div>
+        <span class="expand-icon">▾</span>
+      </div>
+      <div class="exercise-detail">
+        <div class="exercise-detail-inner">
+          <div class="video-thumb-wrap">
+            <a href="https://player.vimeo.com/video/390475816" target="_blank">
+              <img src="https://i.vimeocdn.com/video/854611067-9264d03d079d08fa2bd91f720d95de9e0b585cbbf5d7045355ecc70384e7e32d-d_375?q=50" alt="">
+              <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+            </a>
+          </div>
+          <div class="notes-wrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">9</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/903093464-1881c4189dc742c72c3eef297ef03daa678e14130a4adc3db690b99a217eef73-d_375?q=50" alt="Perdigueiro inverso">
+      <div class="exercise-info">
+        <div class="exercise-name">Perdigueiro inverso (isométrico)</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge tempo">30 seg</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/425505193" target="_blank">
+            <img src="https://i.vimeocdn.com/video/903093464-1881c4189dc742c72c3eef297ef03daa678e14130a4adc3db690b99a217eef73-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Fazer isométrico.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">10</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/1354039111-b6d23a318af7693aa9903a9fde176f2f81fc46d3a191d8adbc5a9b1e1eace192-d_375?q=50" alt="Flexão Nórdica">
+      <div class="exercise-info">
+        <div class="exercise-name">Flexão Nórdica</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge reps">10 reps</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/668680272" target="_blank">
+            <img src="https://i.vimeocdn.com/video/1354039111-b6d23a318af7693aa9903a9fde176f2f81fc46d3a191d8adbc5a9b1e1eace192-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11 -->
+  <div class="exercise" onclick="toggle(this)">
+    <div class="exercise-main">
+      <span class="exercise-num">11</span>
+      <img class="exercise-thumb" src="https://i.vimeocdn.com/video/1354040139-ce5aa94a437224a35b5ab11e9bc79877efd6c6f4bc5c0a3da58bd25927760c50-d_375?q=50" alt="Copenhagen">
+      <div class="exercise-info">
+        <div class="exercise-name">Exercício de Copenhagen</div>
+        <div class="exercise-meta">
+          <span class="badge series">3 séries</span>
+          <span class="badge tempo">35 seg</span>
+        </div>
+      </div>
+      <span class="expand-icon">▾</span>
+    </div>
+    <div class="exercise-detail">
+      <div class="exercise-detail-inner">
+        <div class="video-thumb-wrap">
+          <a href="https://player.vimeo.com/video/668680906" target="_blank">
+            <img src="https://i.vimeocdn.com/video/1354040139-ce5aa94a437224a35b5ab11e9bc79877efd6c6f4bc5c0a3da58bd25927760c50-d_375?q=50" alt="">
+            <div class="play-overlay"><div class="play-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="#333"><path d="M0 0l10 6-10 6z"/></svg></div></div>
+          </a>
+        </div>
+        <div class="notes-wrap">
+          <p class="note">Perna de baixo fica com o joelho flexionado e à frente do corpo.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(index) {
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === index));
+    document.querySelectorAll('.day-panel').forEach((p, i) => p.classList.toggle('active', i === index));
+  }
+
+  function toggle(el) {
+    el.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
