@@ -1113,6 +1113,9 @@
     if (isOpen) {
       if (!iframe.src || iframe.src === window.location.href) {
         iframe.src = iframe.dataset.src;
+        iframe.addEventListener('load', function() {
+          iframe.contentWindow.postMessage(JSON.stringify({ method: 'setVolume', value: 0 }), 'https://player.vimeo.com');
+        }, { once: true });
       }
     } else {
       iframe.src = '';
