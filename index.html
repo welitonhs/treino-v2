@@ -297,6 +297,57 @@
       border-bottom-width: 1px;
     }
 
+    .done-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 32px;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #1e1e1e;
+      border: 1px solid #2a2a2a;
+      color: #666;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .done-btn:hover {
+      background: #252525;
+      border-color: #3a3a3a;
+      color: #aaa;
+    }
+
+    .done-btn.completed {
+      background: rgba(99,199,122,0.1);
+      border-color: rgba(99,199,122,0.3);
+      color: #63c77a;
+    }
+
+    .tab.completed::after {
+      content: ' ✓';
+      font-size: 10px;
+      opacity: 0.7;
+    }
+
+    .next-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #e07b39;
+      background: rgba(224,123,57,0.12);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
     @media (max-width: 480px) {
       .tabs { padding: 0 12px; overflow-x: auto; }
       .tab { padding: 12px 14px; font-size: 12px; }
@@ -312,9 +363,9 @@
 </header>
 
 <div class="tabs">
-  <div class="tab active" onclick="switchTab(0)">Segunda</div>
-  <div class="tab" onclick="switchTab(1)">Terça</div>
-  <div class="tab" onclick="switchTab(2)">Quarta</div>
+  <div class="tab active" onclick="switchTab(0)">Treino 1</div>
+  <div class="tab" onclick="switchTab(1)">Treino 2</div>
+  <div class="tab" onclick="switchTab(2)">Treino 3</div>
 </div>
 
 <div class="day-panel active" id="panel-0">
@@ -1082,6 +1133,8 @@
 
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
+  const TOTAL = 3;
+
   function switchTab(index) {
     document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === index));
     document.querySelectorAll('.day-panel').forEach((p, i) => p.classList.toggle('active', i === index));
@@ -1095,14 +1148,58 @@
       if (!iframe.src || iframe.src === window.location.href) {
         iframe.src = iframe.dataset.src;
         const player = new Vimeo.Player(iframe);
-        player.ready().then(function() {
-          player.setVolume(0);
-        });
+        player.ready().then(function() { player.setVolume(0); });
       }
     } else {
       iframe.src = '';
     }
   }
+
+  function markDone(index) {
+    localStorage.setItem('lastDone', index);
+    updateUI();
+  }
+
+  function updateUI() {
+    const lastDone = parseInt(localStorage.getItem('lastDone') ?? '-1');
+    const nextIndex = lastDone === -1 ? 0 : (lastDone + 1) % TOTAL;
+
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('completed', i === lastDone);
+      // mark next tab
+      const badge = t.querySelector('.next-badge');
+      if (badge) badge.remove();
+      if (i === nextIndex) {
+        const span = document.createElement('span');
+        span.className = 'next-badge';
+        span.textContent = 'próximo';
+        t.appendChild(span);
+      }
+    });
+
+    document.querySelectorAll('.done-btn').forEach((btn, i) => {
+      btn.classList.toggle('completed', i === lastDone);
+      btn.innerHTML = i === lastDone
+        ? '✓ Treino concluído'
+        : `Marcar Treino ${i + 1} como concluído`;
+    });
+  }
+
+  // inject done button into each panel and open next workout on load
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.day-panel').forEach((panel, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'done-btn';
+      btn.onclick = function() { markDone(i); };
+      panel.appendChild(btn);
+    });
+
+    updateUI();
+
+    const lastDone = parseInt(localStorage.getItem('lastDone') ?? '-1');
+    const nextIndex = lastDone === -1 ? 0 : (lastDone + 1) % TOTAL;
+    switchTab(nextIndex);
+  });
 </script>
 
 </body>
