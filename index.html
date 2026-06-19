@@ -1134,6 +1134,34 @@
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
   const TOTAL = 3;
+  const BIN_ID = '6a3494fff5f4af5e290c3048';
+  const BIN_KEY = '$2a$10$4Y22bXTSOlr8LgxgD99gNOheft8.yP1peSbMR33bH7RUPPcGrtE.a';
+  const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+  async function fetchLastDone() {
+    try {
+      const res = await fetch(`${BIN_URL}/latest`, {
+        headers: { 'X-Master-Key': BIN_KEY }
+      });
+      const data = await res.json();
+      const val = data.record.lastDone ?? -1;
+      localStorage.setItem('lastDone', val);
+      return val;
+    } catch {
+      return parseInt(localStorage.getItem('lastDone') ?? '-1');
+    }
+  }
+
+  async function saveLastDone(index) {
+    localStorage.setItem('lastDone', index);
+    try {
+      await fetch(BIN_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY },
+        body: JSON.stringify({ lastDone: index })
+      });
+    } catch {}
+  }
 
   function switchTab(index) {
     document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === index));
@@ -1155,18 +1183,18 @@
     }
   }
 
-  function markDone(index) {
-    localStorage.setItem('lastDone', index);
-    updateUI();
+  async function markDone(index) {
+    const btn = document.querySelectorAll('.done-btn')[index];
+    btn.textContent = 'Salvando...';
+    await saveLastDone(index);
+    updateUI(index);
   }
 
-  function updateUI() {
-    const lastDone = parseInt(localStorage.getItem('lastDone') ?? '-1');
+  function updateUI(lastDone) {
     const nextIndex = lastDone === -1 ? 0 : (lastDone + 1) % TOTAL;
 
     document.querySelectorAll('.tab').forEach((t, i) => {
       t.classList.toggle('completed', i === lastDone);
-      // mark next tab
       const badge = t.querySelector('.next-badge');
       if (badge) badge.remove();
       if (i === nextIndex) {
@@ -1185,18 +1213,17 @@
     });
   }
 
-  // inject done button into each panel and open next workout on load
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', async function() {
     document.querySelectorAll('.day-panel').forEach((panel, i) => {
       const btn = document.createElement('button');
       btn.className = 'done-btn';
+      btn.textContent = 'Carregando...';
       btn.onclick = function() { markDone(i); };
       panel.appendChild(btn);
     });
 
-    updateUI();
-
-    const lastDone = parseInt(localStorage.getItem('lastDone') ?? '-1');
+    const lastDone = await fetchLastDone();
+    updateUI(lastDone);
     const nextIndex = lastDone === -1 ? 0 : (lastDone + 1) % TOTAL;
     switchTab(nextIndex);
   });
